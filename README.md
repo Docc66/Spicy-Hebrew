@@ -1,2 +1,47 @@
-# Spicy-Hebrew
-spicetify extension that translates song lyrics to hebrew in real time with word by word highlighting and builtin playback controls
+<div dir="rtl">
+
+# 🇮🇱 Hebrew Lyrics ל-Spicetify
+
+תוסף ל-Spicetify שמתרגם את המילים של כל שיר לעברית ומציג אותן מסונכרנות, בעיצוב בסגנון [Spicy Lyrics](https://github.com/spikerko/spicy-lyrics/). השיר ממשיך להתנגן כרגיל, רק המילים מתורגמות.
+
+## ✨ מה יש בו
+
+- תרגום אוטומטי של כל שיר לעברית
+- הדגשה **מילה-מילה** בזמן השירה
+- הצגת המילים המקוריות מתחת לתרגום (אפשר לכבות)
+- לחיצה על שורה קופצת אליה בשיר
+- סרגל שליטה שמופיע כשמורידים את העכבר למטה: שיר קודם, שיר הבא, נגן/עצור וווליום
+
+## 📦 התקנה
+
+1. שמור את `hebrewLyrics.js` בתיקיית ההרחבות:
+   - **Windows:** `%appdata%\spicetify\Extensions`
+   - **Mac / Linux:** `~/.config/spicetify/Extensions`
+2. הרץ בטרמינל:
+
+```
+spicetify config extensions hebrewLyrics.js
+spicetify apply
+```
+
+## ▶️ שימוש
+
+- לחץ על הכפתור **"א"** בסרגל הנגן כדי לפתוח את המילים בעברית.
+- **Esc** או הכפתור **סגור** סוגרים את המסך.
+- הורד את העכבר לתחתית המסך כדי לשלוט בנגן.
+
+## 🗑️ הסרה
+
+```
+spicetify config extensions hebrewLyrics.js-
+spicetify apply
+```
+
+## ⚠️ טוב לדעת
+
+- המילים נלקחות מספוטיפיי. שיר בלי מילים בספוטיפיי לא יוצג.
+- ספוטיפיי נותנת זמנים לכל שורה בלבד, ולכן התזמון של כל מילה הוא **הערכה** ועלול לסטות מעט.
+- התרגום אוטומטי (Google Translate) ולא תמיד מדויק, במיוחד בשירה ובסלנג.
+- התוסף עצמאי ואינו חלק רשמי מ-Spicy Lyrics.
+
+</div>
