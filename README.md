@@ -1,3 +1,6 @@
+
+<img width="1439" height="1029" alt="image" src="https://github.com/user-attachments/assets/5fcd16b9-4222-4b31-852f-8d5b3883dda6" />
+
 <div dir="rtl">
 
 # 🇮🇱 Hebrew Lyrics ל-Spicetify
