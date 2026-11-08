@@ -39,10 +39,19 @@
   #heb-top img{width:64px;height:64px;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.45)}
   #heb-title{font-weight:700;font-size:17px;letter-spacing:.2px}
   #heb-artist{opacity:.7;font-size:13px;font-weight:400}
-  #heb-actions{display:flex;align-items:center;gap:8px;margin-top:8px}
-  #heb-tag{font-size:11px;opacity:.65}
-  #heb-lang{font-family:inherit;appearance:none;-webkit-appearance:none;max-width:150px;text-overflow:ellipsis}
-  #heb-lang option{color:#000;background:#fff}
+  #heb-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+  #heb-langwrap{position:relative}
+  #heb-lang{white-space:nowrap}
+  #heb-langlist{display:none;position:absolute;top:calc(100% + 6px);inset-inline-start:0;min-width:140px;
+    max-height:min(55vh,340px);overflow-y:auto;padding:5px;border-radius:14px;z-index:20;
+    background:rgba(18,12,24,.8);background:color-mix(in srgb,var(--bg) 30%,rgba(10,8,14,.88));
+    backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 32px rgba(0,0,0,.45);
+    scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
+  #heb-langlist.open{display:block}
+  .heb-li{padding:6px 12px;border-radius:9px;font-size:13px;line-height:1.3;cursor:pointer;white-space:nowrap;
+    unicode-bidi:plaintext;text-align:start;transition:background .12s}
+  .heb-li:hover{background:rgba(255,255,255,.14)}
+  .heb-li.sel{background:rgba(255,255,255,.22);font-weight:600}
   #heb-lyrics.ltr{direction:ltr}
   #heb-lyrics.ltr .heb-line{transform-origin:left center}
   #heb-lyrics.ltr .heb-line small{text-align:left}
@@ -50,7 +59,7 @@
   #heb-sync{display:flex;align-items:center;gap:4px;font-size:12px;direction:ltr}
   #heb-sync .heb-btn{padding:3px 10px}
   #heb-off{min-width:46px;text-align:center;opacity:.8}
-  .heb-btn{font-family:inherit;background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:999px;padding:5px 13px;
+  .heb-btn{font-family:inherit;background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:999px;padding:4px 11px;
     cursor:pointer;font-size:12px;font-weight:500;-webkit-app-region:no-drag}
   .heb-btn:hover{background:rgba(255,255,255,.26)}
   #heb-close{background:rgba(255,80,80,.55)}
@@ -98,11 +107,10 @@
         <div id="heb-title"></div><div id="heb-artist"></div>
         <div id="heb-actions">
           <button class="heb-btn" id="heb-close">סגור ✕</button>
-          <select class="heb-btn" id="heb-lang" title="שפת תרגום"></select>
+          <div id="heb-langwrap"><button class="heb-btn" id="heb-lang" title="שפת תרגום"></button><div id="heb-langlist"></div></div>
           <button class="heb-btn" id="heb-orig">מקור: פעיל</button>
           <button class="heb-btn" id="heb-mode"></button>
           <span id="heb-sync"><button class="heb-btn" id="heb-sm">−</button><span id="heb-off"></span><button class="heb-btn" id="heb-sp">+</button></span>
-          <span id="heb-tag"></span>
         </div>
       </div>
     </div>
@@ -117,7 +125,6 @@
   document.body.appendChild(overlay);
   listEl = overlay.querySelector("#heb-list");
   const msg = overlay.querySelector("#heb-msg");
-  const tag = overlay.querySelector("#heb-tag");
 
   overlay.querySelector("#heb-close").addEventListener("click", () => toggle(false));
   overlay.querySelector("#heb-orig").addEventListener("click", (e) => {
@@ -127,23 +134,36 @@
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && open) toggle(false); });
 
-  const langEl = overlay.querySelector("#heb-lang");
-  LANGS.forEach(([code, name]) => {
-    const o = document.createElement("option");
-    o.value = code;
-    o.textContent = name;
-    langEl.appendChild(o);
-  });
+  const langBtn = overlay.querySelector("#heb-lang");
+  const langList = overlay.querySelector("#heb-langlist");
   const applyDir = () => {
-    langEl.value = LANG;
+    const cur = LANGS.find((x) => x[0] === LANG) || LANGS[0];
+    langBtn.textContent = cur[1] + " ▾";
+    langList.querySelectorAll(".heb-li").forEach((el) => el.classList.toggle("sel", el.dataset.code === LANG));
     overlay.classList.toggle("ltr", !RTL.includes(LANG.split("-")[0]));
   };
-  langEl.addEventListener("change", () => {
-    LANG = langEl.value;
+  const setLang = (code) => {
+    if (code === LANG) return;
+    LANG = code;
     Spicetify.LocalStorage.set("spicyTargetLang", LANG);
     applyDir();
     if (open) load();
+  };
+  LANGS.forEach(([code, name]) => {
+    const d = document.createElement("div");
+    d.className = "heb-li";
+    d.dataset.code = code;
+    d.textContent = name;
+    d.addEventListener("click", () => setLang(code));
+    langList.appendChild(d);
   });
+  langBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    langList.classList.toggle("open");
+    const sel = langList.querySelector(".sel");
+    if (sel) langList.scrollTop = sel.offsetTop - langList.clientHeight / 2 + sel.offsetHeight / 2;
+  });
+  overlay.addEventListener("click", () => langList.classList.remove("open"));
   applyDir();
 
   let offset = Number(Spicetify.LocalStorage.get("spicyHebrewOffset")) || 0;
@@ -543,7 +563,6 @@
   function render(d) {
     synced = d.synced;
     lines = d.lines;
-    tag.textContent = d.word ? "• תזמון מילים מדויק" : synced ? (d.audio ? "• תזמון מילים משוער + ניתוח שמע" : "• תזמון מילים משוער") : "• מילים ללא סנכרון";
     lines.forEach((l, i) => {
       const words = l.heb.split(/\s+/).filter(Boolean);
       const total = words.reduce((a, w) => a + w.length + 1, 0) || 1;
@@ -606,7 +625,7 @@
     overlay.querySelector("#heb-artist").textContent = (item.artists || []).map((a) => a.name).join(", ");
     overlay.querySelector("#heb-cover").src = coverUrl(item);
     applyColor(item);
-    listEl.innerHTML = ""; lines = []; lineEls = []; activeIdx = -1; tag.textContent = "";
+    listEl.innerHTML = ""; lines = []; lineEls = []; activeIdx = -1;
     msg.textContent = (id + "|" + LANG) in CACHE ? "" : "טוען...";
 
     const d = item.uri.startsWith("spotify:track:") ? await ensure(item) : false;
@@ -660,6 +679,7 @@
   function toggle(force) {
     open = force ?? !open;
     overlay.classList.toggle("on", open);
+    if (!open) langList.classList.remove("open");
     cancelAnimationFrame(raf);
     if (open) { syncControls(); load(); raf = requestAnimationFrame(tick); }
   }
